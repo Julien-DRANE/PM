@@ -28,9 +28,11 @@ html, body {
     position: relative;
     width: 80%;
     max-width: 300px;
+    /* Assurez-vous que le ratio d'aspect correspond à vos images */
     aspect-ratio: 1 / 1; /* Ajustez selon vos images */
     width: 100%;
     height: auto;
+    overflow: hidden; /* Évite les débordements */
 }
 
 #character img {
@@ -39,14 +41,20 @@ html, body {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Assure que l'image couvre tout le conteneur */
+    object-fit: cover; /* Couvre entièrement le conteneur sans déformation */
     display: block;
     margin: 0;
+    padding: 0;
+    border: none;
 }
 
-/* Ajoutez cette règle pour descendre l'image supérieure de 2 pixels */
+/* Ajustement spécifique pour l'image supérieure */
 #upper-part {
-    top: 2px; /* Descend l'image supérieure de 2 pixels */
+    /* Supprimez tout décalage vertical précédemment appliqué */
+    top: 0;
+    /* Si nécessaire, ajustez légèrement avec transform */
+    transform: translateY(2px); /* Déplace l'image supérieure de 2 pixels vers le bas */
+    /* Vous pouvez ajuster cette valeur si nécessaire */
 }
 
 #controls {
