@@ -15,16 +15,8 @@ const materials = [];
 const textureLoader = new THREE.TextureLoader();
 for (let i = 0; i < segments; i++) {
     const texturePath = `textures/facet${i + 1}.png`; // Chemin des images PNG
-    const texture = textureLoader.load(texturePath, (texture) => {
-        // Redimensionne les UV de la texture pour chaque facette
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(1, 1);
-    });
-    
-    // Crée un matériau pour chaque facette avec une texture unique
-    const material = new THREE.MeshBasicMaterial({ map: texture });
-    materials.push(material);
+    const texture = textureLoader.load(texturePath);
+    materials.push(new THREE.MeshBasicMaterial({ map: texture }));
 }
 
 // Création de la géométrie du cylindre avec 7 segments
@@ -42,10 +34,70 @@ scene.add(cylinder);
 // Position de la caméra
 camera.position.z = 20;
 
-// Animation pour faire tourner le cylindre
+// Variables de contrôle pour les interactions
+let rotationSpeed = 0;
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+
+// Gestion des touches du clavier
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') {
+        rotationSpeed = 0.05;
+    } else if (event.key === 'ArrowRight') {
+        rotationSpeed = -0.05;
+    }
+});
+
+// Arrêter la rotation lors du relâchement des touches
+window.addEventListener('keyup', () => {
+    rotationSpeed = 0;
+});
+
+// Gestion du clic de la souris pour faire pivoter le cylindre
+renderer.domElement.addEventListener('mousedown', (event) => {
+    isDragging = true;
+    previousMousePosition = {
+        x: event.clientX,
+        y: event.clientY
+    };
+});
+
+renderer.domElement.addEventListener('mousemove', (event) => {
+    if (isDragging) {
+        const deltaX = event.clientX - previousMousePosition.x;
+        cylinder.rotation.y += deltaX * 0.005;
+        previousMousePosition = {
+            x: event.clientX,
+            y: event.clientY
+        };
+    }
+});
+
+renderer.domElement.addEventListener('mouseup', () => {
+    isDragging = false;
+});
+
+// Gestion du swipe sur mobile
+renderer.domElement.addEventListener('touchstart', (event) => {
+    previousMousePosition = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY
+    };
+});
+
+renderer.domElement.addEventListener('touchmove', (event) => {
+    const deltaX = event.touches[0].clientX - previousMousePosition.x;
+    cylinder.rotation.y += deltaX * 0.005;
+    previousMousePosition = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY
+    };
+});
+
+// Animation pour faire tourner le cylindre selon les interactions
 function animate() {
     requestAnimationFrame(animate);
-    cylinder.rotation.y += 0.01;
+    cylinder.rotation.y += rotationSpeed;
     renderer.render(scene, camera);
 }
 
