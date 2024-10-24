@@ -37,11 +37,21 @@ for (let i = 0; i < segments; i++) {
     const lowerTexturePath = `textures/facet_lower_${i + 1}.png`; // Chemin des images PNG pour le bas
 
     // Charger la texture pour le haut
-    const upperTexture = textureLoader.load(upperTexturePath);
+    const upperTexture = textureLoader.load(upperTexturePath, (texture) => {
+        texture.minFilter = THREE.LinearMipMapLinearFilter; // Meilleur filtrage
+        texture.magFilter = THREE.LinearFilter; // Meilleur filtrage pour le zoom
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+    });
     upperMaterials.push(new THREE.MeshBasicMaterial({ map: upperTexture }));
 
     // Charger la texture pour le bas
-    const lowerTexture = textureLoader.load(lowerTexturePath);
+    const lowerTexture = textureLoader.load(lowerTexturePath, (texture) => {
+        texture.minFilter = THREE.LinearMipMapLinearFilter; // Meilleur filtrage
+        texture.magFilter = THREE.LinearFilter; // Meilleur filtrage pour le zoom
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+    });
     lowerMaterials.push(new THREE.MeshBasicMaterial({ map: lowerTexture }));
 }
 
