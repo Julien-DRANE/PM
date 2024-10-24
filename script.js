@@ -66,15 +66,50 @@ window.onload = () => {
     updateLowerImage();
 };
 
+// Gestion des gestes de glissement (swipe) sur le personnage
+let touchStartX = 0;
+let touchEndX = 0;
+
+const character = document.getElementById('character');
+
+character.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+}, false);
+
+character.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleGesture();
+}, false);
+
+function handleGesture() {
+    const deltaX = touchEndX - touchStartX;
+    const threshold = 50; // Distance minimale pour considérer un swipe
+
+    if (Math.abs(deltaX) > threshold) {
+        if (deltaX > 0) {
+            // Swipe vers la droite
+            // Changer la partie inférieure
+            currentLower = currentLower === 1 ? TOTAL_LOWER : currentLower - 1;
+            updateLowerImage();
+        } else {
+            // Swipe vers la gauche
+            // Changer la partie inférieure
+            currentLower = currentLower === TOTAL_LOWER ? 1 : currentLower + 1;
+            updateLowerImage();
+        }
+    }
+}
+
 // Gestion du plein écran sur mobile
 document.addEventListener('DOMContentLoaded', () => {
     function enterFullScreen() {
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-        } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
-            document.documentElement.webkitRequestFullscreen();
-        } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
-            document.documentElement.msRequestFullscreen();
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
         }
     }
 
