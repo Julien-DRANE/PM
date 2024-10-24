@@ -22,9 +22,11 @@ for (let i = 0; i < segments; i++) {
 // Création de la géométrie du cylindre avec 7 segments
 const geometry = new THREE.CylinderGeometry(radius, radius, height, segments, 1, true);
 
-// Associe chaque matériau aux segments (facettes) du cylindre
+// Divise la géométrie en groupes pour chaque facette
+geometry.clearGroups();
+const faceCount = segments * 4; // Chaque segment a 4 faces (deux triangles par face latérale)
 for (let i = 0; i < segments; i++) {
-    geometry.groups[i].materialIndex = i;
+    geometry.addGroup(i * 6, 6, i); // Chaque facette a 6 indices de triangles
 }
 
 // Crée le cylindre avec les matériaux multiples
