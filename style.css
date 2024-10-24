@@ -44,6 +44,11 @@ html, body {
     margin: 0;
 }
 
+/* Ajoutez cette règle pour descendre l'image supérieure de 2 pixels */
+#upper-part {
+    top: 2px; /* Descend l'image supérieure de 2 pixels */
+}
+
 #controls {
     position: absolute;
     bottom: 20px;
@@ -79,10 +84,4 @@ html, body {
         font-size: 14px;
         padding: 8px 12px;
     }
-}
-/* ... Votre CSS existant ... */
-
-/* Ajoutez cette section pour ajuster la position de l'image supérieure */
-#upper-part {
-    top: 2px; /* Descend l'image supérieure de 2 pixels */
 }
