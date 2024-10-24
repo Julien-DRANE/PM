@@ -69,6 +69,14 @@ let isUpperDragging = false;
 let isLowerDragging = false;
 let previousUpperMousePosition = { x: 0, y: 0 };
 let previousLowerMousePosition = { x: 0, y: 0 };
+let segmentAngle = (2 * Math.PI) / segments; // Calculer l'angle de chaque facette
+
+// Fonction d'alignement sur les facettes
+function alignOnFace(cylinder) {
+    let currentRotation = cylinder.rotation.y;
+    let closestAngle = Math.round(currentRotation / segmentAngle) * segmentAngle; // Aligner sur la facette la plus proche
+    cylinder.rotation.y = closestAngle; // Réinitialiser la rotation au plus proche angle de facette
+}
 
 // Gestion du clic de la souris pour faire pivoter le cylindre supérieur
 renderer.domElement.addEventListener('mousedown', (event) => {
@@ -94,6 +102,7 @@ renderer.domElement.addEventListener('mousemove', (event) => {
 // Gestion de la fin du clic pour le cylindre supérieur
 renderer.domElement.addEventListener('mouseup', () => {
     isUpperDragging = false;
+    alignOnFace(upperCylinder); // Aligner sur la facette après rotation
 });
 
 // Gestion du clic de la souris pour faire pivoter le cylindre inférieur
@@ -120,6 +129,7 @@ renderer.domElement.addEventListener('mousemove', (event) => {
 // Gestion de la fin du clic pour le cylindre inférieur
 renderer.domElement.addEventListener('mouseup', () => {
     isLowerDragging = false;
+    alignOnFace(lowerCylinder); // Aligner sur la facette après rotation
 });
 
 // Animation avec alignement
