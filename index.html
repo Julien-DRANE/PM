@@ -1,17 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Three.js Cylinder Facets</title>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { display: block; }
-    </style>
-    <!-- Inclusion de la bibliothèque Three.js depuis un CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Tenues</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Inclusion de ton fichier JavaScript apps.js -->
-    <script src="apps.js"></script>
+    <div id="game-container">
+        <div id="character">
+            <img id="upper-part" src="textures/facet_upper_1.png" alt="Partie Supérieure">
+            <img id="lower-part" src="textures/facet_lower_1.png" alt="Partie Inférieure">
+        </div>
+        <div id="controls">
+            <button id="prev-upper">👆 Précédent</button>
+            <button id="next-upper">👆 Suivant</button>
+            <button id="prev-lower">👇 Précédent</button>
+            <button id="next-lower">👇 Suivant</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
