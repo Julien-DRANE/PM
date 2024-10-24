@@ -79,11 +79,10 @@ for (let i = 0; i < segments; i++) {
 const cylinder = new THREE.Mesh(geometry, materials);
 scene.add(cylinder);
 
-// Variables de contrôle pour les interactions et l'inertie
+// Variables de contrôle pour les interactions
 let rotationSpeed = 0;
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
-let targetRotation = 0;
 let segmentAngle = (2 * Math.PI) / segments;
 
 // Gestion des touches du clavier pour la rotation
@@ -97,7 +96,8 @@ window.addEventListener('keydown', (event) => {
 
 // Arrêter la rotation lors du relâchement des touches
 window.addEventListener('keyup', () => {
-    rotationSpeed *= 0.9; // Applique une légère réduction de vitesse (inertie)
+    rotationSpeed = 0; // Arrête immédiatement la rotation
+    alignToFacets(); // Aligne sur la facette après l'arrêt
 });
 
 // Gestion du clic de la souris pour faire pivoter le cylindre
@@ -112,7 +112,7 @@ renderer.domElement.addEventListener('mousedown', (event) => {
 renderer.domElement.addEventListener('mousemove', (event) => {
     if (isDragging) {
         const deltaX = event.clientX - previousMousePosition.x;
-        targetRotation = deltaX * 0.002; // Applique une petite variation de rotation par mouvement de souris
+        rotationSpeed = deltaX * 0.002; // Applique une petite variation de rotation par mouvement de souris
         previousMousePosition = {
             x: event.clientX,
             y: event.clientY
@@ -122,8 +122,8 @@ renderer.domElement.addEventListener('mousemove', (event) => {
 
 renderer.domElement.addEventListener('mouseup', () => {
     isDragging = false;
-    rotationSpeed = targetRotation; // Applique la rotation finale comme vitesse initiale pour l'inertie
-    targetRotation = 0; // Réinitialise la cible de rotation
+    rotationSpeed = 0; // Arrête immédiatement la rotation
+    alignToFacets(); // Aligne sur la facette après la fin du drag
 });
 
 // Gestion du swipe sur mobile
@@ -136,11 +136,16 @@ renderer.domElement.addEventListener('touchstart', (event) => {
 
 renderer.domElement.addEventListener('touchmove', (event) => {
     const deltaX = event.touches[0].clientX - previousMousePosition.x;
-    targetRotation = deltaX * 0.002;
+    rotationSpeed = deltaX * 0.002; // Applique une petite variation de rotation par mouvement de touche
     previousMousePosition = {
         x: event.touches[0].clientX,
         y: event.touches[0].clientY
     };
+});
+
+renderer.domElement.addEventListener('touchend', () => {
+    rotationSpeed = 0; // Arrête immédiatement la rotation
+    alignToFacets(); // Aligne sur la facette après le swipe
 });
 
 // Alignement automatique sur les facettes
@@ -150,17 +155,14 @@ function alignToFacets() {
     cylinder.rotation.y += (closestAngle - currentRotation) * 0.1; // Lissage
 }
 
-// Animation avec inertie et alignement
+// Animation avec alignement
 function animate() {
     requestAnimationFrame(animate);
     
-    if (!isDragging) {
-        rotationSpeed *= 0.95; // Réduction progressive de la vitesse pour l'inertie
-        cylinder.rotation.y += rotationSpeed; // Appliquer la vitesse de rotation
-        alignToFacets(); // Caler automatiquement sur les facettes
-    } else {
-        cylinder.rotation.y += targetRotation; // Appliquer la rotation pendant le glissement
-    }
+    // Appliquer la vitesse de rotation
+    cylinder.rotation.y += rotationSpeed; 
+
+    alignToFacets(); // Caler automatiquement sur les facettes
 
     renderer.render(scene, camera);
 }
