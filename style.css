@@ -80,6 +80,9 @@ html, body {
         padding: 8px 12px;
     }
 }
+/* ... Votre CSS existant ... */
+
 /* Ajoutez cette section pour ajuster la position de l'image supérieure */
 #upper-part {
     top: 2px; /* Descend l'image supérieure de 2 pixels */
+}
