@@ -37,21 +37,11 @@ for (let i = 0; i < segments; i++) {
     const lowerTexturePath = `textures/facet_lower_${i + 1}.png`; // Chemin des images PNG pour le bas
 
     // Charger la texture pour le haut
-    const upperTexture = textureLoader.load(upperTexturePath, (texture) => {
-        texture.minFilter = THREE.LinearMipMapLinearFilter; // Meilleur filtrage
-        texture.magFilter = THREE.LinearFilter; // Meilleur filtrage pour le zoom
-        texture.wrapS = THREE.ClampToEdgeWrapping;
-        texture.wrapT = THREE.ClampToEdgeWrapping;
-    });
+    const upperTexture = textureLoader.load(upperTexturePath);
     upperMaterials.push(new THREE.MeshBasicMaterial({ map: upperTexture }));
 
     // Charger la texture pour le bas
-    const lowerTexture = textureLoader.load(lowerTexturePath, (texture) => {
-        texture.minFilter = THREE.LinearMipMapLinearFilter; // Meilleur filtrage
-        texture.magFilter = THREE.LinearFilter; // Meilleur filtrage pour le zoom
-        texture.wrapS = THREE.ClampToEdgeWrapping;
-        texture.wrapT = THREE.ClampToEdgeWrapping;
-    });
+    const lowerTexture = textureLoader.load(lowerTexturePath);
     lowerMaterials.push(new THREE.MeshBasicMaterial({ map: lowerTexture }));
 }
 
@@ -59,6 +49,19 @@ for (let i = 0; i < segments; i++) {
 const radius = 5; // Rayon fixe pour simplifier
 const height = 10; // Hauteur fixe pour simplifier
 const geometry = new THREE.CylinderGeometry(radius, radius, height / 2, segments, 1, true); // Cylindre pour la moitié supérieure
+
+// Ajustement des coordonnées UV
+const uvs = geometry.attributes.uv.array;
+for (let i = 0; i < segments; i++) {
+    const startIdx = i * 4 * 2;
+    uvs[startIdx] = i / segments;       // u1
+    uvs[startIdx + 2] = (i + 1) / segments; // u2
+    uvs[startIdx + 4] = 0;              // u3
+    uvs[startIdx + 6] = 1;              // u4
+}
+
+// Met à jour les attributs UV de la géométrie
+geometry.attributes.uv.needsUpdate = true;
 
 // Création de la partie supérieure
 const upperCylinder = new THREE.Mesh(geometry, upperMaterials);
