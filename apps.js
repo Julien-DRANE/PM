@@ -37,42 +37,34 @@ for (let i = 0; i < segments; i++) {
     const lowerTexturePath = `textures/facet_lower_${i + 1}.png`; // Chemin des images PNG pour le bas
 
     // Charger la texture pour le haut
-    const upperTexture = textureLoader.load(upperTexturePath, (texture) => {
-        texture.minFilter = THREE.LinearMipMapLinearFilter; // Meilleur filtrage
-        texture.magFilter = THREE.LinearFilter; // Meilleur filtrage pour le zoom
-        texture.wrapS = THREE.ClampToEdgeWrapping;
-        texture.wrapT = THREE.ClampToEdgeWrapping;
-    });
+    const upperTexture = textureLoader.load(upperTexturePath);
     upperMaterials.push(new THREE.MeshBasicMaterial({ map: upperTexture }));
 
     // Charger la texture pour le bas
-    const lowerTexture = textureLoader.load(lowerTexturePath, (texture) => {
-        texture.minFilter = THREE.LinearMipMapLinearFilter; // Meilleur filtrage
-        texture.magFilter = THREE.LinearFilter; // Meilleur filtrage pour le zoom
-        texture.wrapS = THREE.ClampToEdgeWrapping;
-        texture.wrapT = THREE.ClampToEdgeWrapping;
-    });
+    const lowerTexture = textureLoader.load(lowerTexturePath);
     lowerMaterials.push(new THREE.MeshBasicMaterial({ map: lowerTexture }));
 }
 
 // Création de la géométrie du cylindre avec des dimensions fixes
 const radius = 5; // Rayon fixe pour simplifier
 const height = 10; // Hauteur fixe pour simplifier
-const geometry = new THREE.CylinderGeometry(radius, radius, height / 2, segments, 1, true); // Cylindre pour la moitié supérieure
+const geometry = new THREE.CylinderGeometry(radius, radius, height, segments, 1, true); // Cylindre pour la moitié supérieure
 
 // Ajustement des coordonnées UV
 const uvs = geometry.attributes.uv.array;
+const faceHeight = height / segments; // Hauteur de chaque face
+
 for (let i = 0; i < segments; i++) {
     const startIdx = i * 4 * 2;
     // Définir les UVs pour chaque face
     uvs[startIdx] = i / segments;         // u1
-    uvs[startIdx + 1] = 1;                // v1
+    uvs[startIdx + 1] = 1;                // v1 (en haut)
     uvs[startIdx + 2] = (i + 1) / segments; // u2
-    uvs[startIdx + 3] = 1;                // v2
+    uvs[startIdx + 3] = 1;                // v2 (en haut)
     uvs[startIdx + 4] = i / segments;         // u3
-    uvs[startIdx + 5] = 0;                // v3
+    uvs[startIdx + 5] = 0;                // v3 (en bas)
     uvs[startIdx + 6] = (i + 1) / segments; // u4
-    uvs[startIdx + 7] = 0;                // v4
+    uvs[startIdx + 7] = 0;                // v4 (en bas)
 }
 
 // Met à jour les attributs UV de la géométrie
