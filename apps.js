@@ -24,9 +24,9 @@ const geometry = new THREE.CylinderGeometry(radius, radius, height, segments, 1,
 
 // Divise la géométrie en groupes pour chaque facette
 geometry.clearGroups();
-const faceCount = segments * 4; // Chaque segment a 4 faces (deux triangles par face latérale)
 for (let i = 0; i < segments; i++) {
-    geometry.addGroup(i * 6, 6, i); // Chaque facette a 6 indices de triangles
+    // Chaque segment a 4 faces (2 triangles par face latérale), d'où 6 indices de triangles par segment
+    geometry.addGroup(i * 6, 6, i);
 }
 
 // Crée le cylindre avec les matériaux multiples
