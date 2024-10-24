@@ -1,9 +1,9 @@
 // Nombre de segments (facettes) correspondant au nombre d'images
-const segments = 7; // Assure-toi que cette ligne est bien présente
+const segments = 7;
 
 // Initialisation de la scène
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xaaaaaa); // Définir un fond clair
+scene.background = new THREE.Color(0xaaaaaa);
 
 // Ajout d'une lumière directionnelle
 const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -12,7 +12,7 @@ scene.add(light);
 
 // Initialisation de la caméra
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 20); // Position de la caméra pour voir le cylindre
+camera.position.set(0, 0, 20);
 camera.lookAt(0, 0, 0);
 
 // Initialisation du rendu
@@ -38,28 +38,22 @@ for (let i = 0; i < segments; i++) {
 
     // Charger la texture pour le haut
     const upperTexture = textureLoader.load(upperTexturePath, (texture) => {
-        // Configurez les paramètres de texture pour éviter le zoom
-        texture.wrapS = THREE.ClampToEdgeWrapping;
-        texture.wrapT = THREE.ClampToEdgeWrapping;
-        texture.minFilter = THREE.LinearMipMapLinearFilter; // Mieux pour les textures de grande taille
-        texture.magFilter = THREE.LinearFilter; // Meilleur filtrage pour les zooms
+        texture.wrapS = THREE.ClampToEdgeWrapping; // Évite l'étirement horizontal
+        texture.wrapT = THREE.ClampToEdgeWrapping; // Évite l'étirement vertical
     });
     upperMaterials.push(new THREE.MeshBasicMaterial({ map: upperTexture }));
 
     // Charger la texture pour le bas
     const lowerTexture = textureLoader.load(lowerTexturePath, (texture) => {
-        // Configurez les paramètres de texture pour éviter le zoom
-        texture.wrapS = THREE.ClampToEdgeWrapping;
-        texture.wrapT = THREE.ClampToEdgeWrapping;
-        texture.minFilter = THREE.LinearMipMapLinearFilter; // Mieux pour les textures de grande taille
-        texture.magFilter = THREE.LinearFilter; // Meilleur filtrage pour les zooms
+        texture.wrapS = THREE.ClampToEdgeWrapping; // Évite l'étirement horizontal
+        texture.wrapT = THREE.ClampToEdgeWrapping; // Évite l'étirement vertical
     });
     lowerMaterials.push(new THREE.MeshBasicMaterial({ map: lowerTexture }));
 }
 
-// Création de la géométrie du cylindre avec des dimensions fixes
-const radius = 5; // Rayon fixe pour simplifier
-const height = 10; // Hauteur fixe pour simplifier
+// Création de la géométrie du cylindre
+const radius = 5; // Rayon du cylindre
+const height = 10; // Hauteur du cylindre
 const geometry = new THREE.CylinderGeometry(radius, radius, height, segments, 1, true); // Cylindre
 
 // Ajustement des coordonnées UV
