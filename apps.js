@@ -1,169 +1,85 @@
-// Nombre de segments (facettes) correspondant au nombre d'images
-const segments = 7;
+// Nombre total de tenues
+const TOTAL_UPPER = 7;
+const TOTAL_LOWER = 7;
 
-// Initialisation de la scène
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xaaaaaa); // Définir un fond clair
+// Indices actuels des tenues
+let currentUpper = 1;
+let currentLower = 1;
 
-// Ajout d'une lumière directionnelle
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(0, 1, 1).normalize();
-scene.add(light);
+// Sélection des éléments DOM
+const upperImg = document.getElementById('upper-part');
+const lowerImg = document.getElementById('lower-part');
 
-// Initialisation de la caméra
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 20); // Position de la caméra pour voir le cylindre
-camera.lookAt(0, 0, 0);
+const prevUpperBtn = document.getElementById('prev-upper');
+const nextUpperBtn = document.getElementById('next-upper');
+const prevLowerBtn = document.getElementById('prev-lower');
+const nextLowerBtn = document.getElementById('next-lower');
 
-// Initialisation du rendu
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-// Ajustement de la taille du rendu pour occuper tout l'écran
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// Crée un tableau de matériaux et charge les textures pour le haut et le bas
-const upperMaterials = [];
-const lowerMaterials = [];
-const textureLoader = new THREE.TextureLoader();
-
-for (let i = 0; i < segments; i++) {
-    const upperTexturePath = `textures/facet_upper_${i + 1}.png`; // Chemin des images PNG pour le haut
-    const lowerTexturePath = `textures/facet_lower_${i + 1}.png`; // Chemin des images PNG pour le bas
-
-    // Charger la texture pour le haut
-    const upperTexture = textureLoader.load(upperTexturePath);
-    upperMaterials.push(new THREE.MeshBasicMaterial({ map: upperTexture }));
-
-    // Charger la texture pour le bas
-    const lowerTexture = textureLoader.load(lowerTexturePath);
-    lowerMaterials.push(new THREE.MeshBasicMaterial({ map: lowerTexture }));
+// Fonction pour mettre à jour l'image supérieure
+function updateUpperImage() {
+    upperImg.src = `textures/facet_upper_${currentUpper}.png`;
 }
 
-// Création de la géométrie du cylindre
-const radius = 5; // Rayon du cylindre
-const height = 10; // Hauteur totale du cylindre
-const geometry = new THREE.CylinderGeometry(radius, radius, height, segments, 1, true); // Cylindre
-
-// Ajustement des coordonnées UV
-const uvs = geometry.attributes.uv.array;
-
-for (let i = 0; i < segments; i++) {
-    const startIdx = i * 4 * 2;
-    // Définir les UVs pour chaque face
-    uvs[startIdx] = i / segments;         // u1
-    uvs[startIdx + 1] = 0;                // v1 (en bas)
-    uvs[startIdx + 2] = (i + 1) / segments; // u2
-    uvs[startIdx + 3] = 0;                // v2 (en bas)
-    uvs[startIdx + 4] = i / segments;         // u3
-    uvs[startIdx + 5] = 1;                // v3 (en haut)
-    uvs[startIdx + 6] = (i + 1) / segments; // u4
-    uvs[startIdx + 7] = 1;                // v4 (en haut)
+// Fonction pour mettre à jour l'image inférieure
+function updateLowerImage() {
+    lowerImg.src = `textures/facet_lower_${currentLower}.png`;
 }
 
-// Met à jour les attributs UV de la géométrie
-geometry.attributes.uv.needsUpdate = true;
+// Gestion des clics sur les boutons de la partie supérieure
+prevUpperBtn.addEventListener('click', () => {
+    currentUpper = currentUpper === 1 ? TOTAL_UPPER : currentUpper - 1;
+    updateUpperImage();
+});
 
-// Création de la partie supérieure
-const upperCylinder = new THREE.Mesh(geometry, upperMaterials);
-upperCylinder.position.y = height / 4; // Positionner en haut
+nextUpperBtn.addEventListener('click', () => {
+    currentUpper = currentUpper === TOTAL_UPPER ? 1 : currentUpper + 1;
+    updateUpperImage();
+});
 
-// Création de la partie inférieure
-const lowerCylinder = new THREE.Mesh(geometry, lowerMaterials);
-lowerCylinder.position.y = -height / 4; // Positionner en bas
+// Gestion des clics sur les boutons de la partie inférieure
+prevLowerBtn.addEventListener('click', () => {
+    currentLower = currentLower === 1 ? TOTAL_LOWER : currentLower - 1;
+    updateLowerImage();
+});
 
-// Ajouter les cylindres à la scène
-scene.add(upperCylinder);
-scene.add(lowerCylinder);
+nextLowerBtn.addEventListener('click', () => {
+    currentLower = currentLower === TOTAL_LOWER ? 1 : currentLower + 1;
+    updateLowerImage();
+});
 
-// Variables de contrôle pour les interactions
-let upperRotationSpeed = 0;
-let lowerRotationSpeed = 0;
-let isUpperDragging = false;
-let isLowerDragging = false;
-let previousUpperMousePosition = { x: 0, y: 0 };
-let previousLowerMousePosition = { x: 0, y: 0 };
-let segmentAngle = (2 * Math.PI) / segments; // Calculer l'angle de chaque facette
-
-// Fonction d'alignement sur les facettes
-function alignOnFace(cylinder) {
-    let currentRotation = cylinder.rotation.y;
-    let closestAngle = Math.round(currentRotation / segmentAngle) * segmentAngle; // Aligner sur la facette la plus proche
-    cylinder.rotation.y = closestAngle; // Réinitialiser la rotation au plus proche angle de facette
+// Préchargement des images pour une meilleure performance
+function preloadImages() {
+    for (let i = 1; i <= TOTAL_UPPER; i++) {
+        const img = new Image();
+        img.src = `textures/facet_upper_${i}.png`;
+    }
+    for (let i = 1; i <= TOTAL_LOWER; i++) {
+        const img = new Image();
+        img.src = `textures/facet_lower_${i}.png`;
+    }
 }
 
-// Gestion du clic de la souris pour faire pivoter le cylindre supérieur
-renderer.domElement.addEventListener('mousedown', (event) => {
-    if (event.button === 0) { // S'assurer que seul le bouton gauche de la souris est utilisé
-        isUpperDragging = true;
-        previousUpperMousePosition = {
-            x: event.clientX,
-            y: event.clientY
-        };
+// Initialisation
+window.onload = () => {
+    preloadImages();
+    updateUpperImage();
+    updateLowerImage();
+};
+
+// Gestion du plein écran sur mobile
+document.addEventListener('DOMContentLoaded', () => {
+    function enterFullScreen() {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+            document.documentElement.webkitRequestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
+            document.documentElement.msRequestFullscreen();
+        }
     }
+
+    // Entrer en plein écran au clic sur l'écran
+    document.body.addEventListener('click', () => {
+        enterFullScreen();
+    }, { once: true });
 });
-
-// Gestion du mouvement de la souris pour faire pivoter le cylindre supérieur
-renderer.domElement.addEventListener('mousemove', (event) => {
-    if (isUpperDragging) {
-        const deltaX = event.clientX - previousUpperMousePosition.x;
-        upperRotationSpeed = deltaX * 0.002; // Applique une petite variation de rotation par mouvement de souris
-        previousUpperMousePosition = {
-            x: event.clientX,
-            y: event.clientY
-        };
-    }
-});
-
-// Gestion de la fin du clic pour le cylindre supérieur
-renderer.domElement.addEventListener('mouseup', () => {
-    isUpperDragging = false;
-    alignOnFace(upperCylinder); // Aligner sur la facette après rotation
-});
-
-// Gestion du clic de la souris pour faire pivoter le cylindre inférieur
-renderer.domElement.addEventListener('mousedown', (event) => {
-    if (event.button === 2) { // S'assurer que seul le bouton droit de la souris est utilisé
-        isLowerDragging = true;
-        previousLowerMousePosition = {
-            x: event.clientX,
-            y: event.clientY
-        };
-    }
-});
-
-// Gestion du mouvement de la souris pour faire pivoter le cylindre inférieur
-renderer.domElement.addEventListener('mousemove', (event) => {
-    if (isLowerDragging) {
-        const deltaX = event.clientX - previousLowerMousePosition.x;
-        lowerRotationSpeed = deltaX * 0.002; // Applique une petite variation de rotation par mouvement de souris
-        previousLowerMousePosition = {
-            x: event.clientX,
-            y: event.clientY
-        };
-    }
-});
-
-// Gestion de la fin du clic pour le cylindre inférieur
-renderer.domElement.addEventListener('mouseup', () => {
-    isLowerDragging = false;
-    alignOnFace(lowerCylinder); // Aligner sur la facette après rotation
-});
-
-// Animation avec alignement
-function animate() {
-    requestAnimationFrame(animate);
-    
-    // Appliquer la vitesse de rotation
-    upperCylinder.rotation.y += upperRotationSpeed; 
-    lowerCylinder.rotation.y += lowerRotationSpeed; 
-
-    renderer.render(scene, camera);
-}
-
-animate();
