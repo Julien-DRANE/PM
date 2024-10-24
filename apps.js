@@ -1,6 +1,18 @@
 // Initialisation de la scène
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xaaaaaa); // Définir un fond clair
+
+// Ajout d'une lumière directionnelle
+const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(0, 1, 1).normalize();
+scene.add(light);
+
+// Initialisation de la caméra
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 20); // Position de la caméra pour voir le cylindre
+camera.lookAt(0, 0, 0);
+
+// Initialisation du rendu
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -18,46 +30,29 @@ let totalWidth = 0; // Largeur totale des facettes
 // Charge les textures et ajuste la taille du cylindre
 for (let i = 0; i < segments; i++) {
     const texturePath = `textures/facet${i + 1}.png`; // Chemin des images PNG
-    const texture = textureLoader.load(texturePath, (texture) => {
-        // Redimensionne les UV de la texture pour chaque facette
-        texture.wrapS = THREE.ClampToEdgeWrapping;
-        texture.wrapT = THREE.ClampToEdgeWrapping;
-
-        // Récupère les dimensions de l'image
-        const imageWidth = texture.image.width;
-        const imageHeight = texture.image.height;
-
-        // Ajuste le rayon du cylindre en fonction de la largeur des images
-        radius = Math.max(radius, imageWidth / (2 * Math.PI / segments));
-        height = imageHeight; // Ajuste la hauteur du cylindre à la hauteur des images
-
-        // Calcule la largeur totale des facettes pour ajuster le rayon
-        totalWidth += imageWidth;
-    });
+    const texture = textureLoader.load(
+        texturePath,
+        () => console.log(`Texture ${i + 1} chargée`),
+        undefined,
+        (err) => console.error(`Erreur de chargement de la texture ${texturePath}`, err)
+    );
 
     // Crée un matériau pour chaque facette avec une texture unique
     materials.push(new THREE.MeshBasicMaterial({ map: texture }));
 }
 
-// Réinitialise le rayon pour correspondre à la largeur totale des images
-radius = totalWidth / (2 * Math.PI);
-
-// Création de la géométrie du cylindre avec les nouvelles dimensions
+// Création de la géométrie du cylindre avec 7 segments
 const geometry = new THREE.CylinderGeometry(radius, radius, height, segments, 1, true);
 
 // Divise la géométrie en groupes pour chaque facette
 geometry.clearGroups();
 for (let i = 0; i < segments; i++) {
-    // Chaque segment a 4 faces (2 triangles par face latérale), d'où 6 indices de triangles par segment
     geometry.addGroup(i * 6, 6, i);
 }
 
 // Crée le cylindre avec les matériaux multiples
 const cylinder = new THREE.Mesh(geometry, materials);
 scene.add(cylinder);
-
-// Position de la caméra
-camera.position.z = 20;
 
 // Variables de contrôle pour les interactions
 let rotationSpeed = 0;
