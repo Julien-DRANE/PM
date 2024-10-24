@@ -48,7 +48,7 @@ for (let i = 0; i < segments; i++) {
 // Création de la géométrie du cylindre avec des dimensions fixes
 const radius = 5; // Rayon fixe pour simplifier
 const height = 10; // Hauteur fixe pour simplifier
-const geometry = new THREE.CylinderGeometry(radius, radius, height / 2, segments, 1, true); // Cylindre pour la moitié supérieure
+const geometry = new THREE.CylinderGeometry(radius, radius, height, segments, 1, true); // Cylindre
 
 // Ajustement des coordonnées UV
 const uvs = geometry.attributes.uv.array;
@@ -57,22 +57,13 @@ for (let i = 0; i < segments; i++) {
     const startIdx = i * 4 * 2;
     // Définir les UVs pour chaque face
     uvs[startIdx] = i / segments;         // u1
-    uvs[startIdx + 1] = 1;                // v1 (en haut)
+    uvs[startIdx + 1] = 0;                // v1 (en bas)
     uvs[startIdx + 2] = (i + 1) / segments; // u2
-    uvs[startIdx + 3] = 1;                // v2 (en haut)
+    uvs[startIdx + 3] = 0;                // v2 (en bas)
     uvs[startIdx + 4] = i / segments;         // u3
-    uvs[startIdx + 5] = 0;                // v3 (en bas)
+    uvs[startIdx + 5] = 1;                // v3 (en haut)
     uvs[startIdx + 6] = (i + 1) / segments; // u4
-    uvs[startIdx + 7] = 0;                // v4 (en bas)
-}
-
-// Inverser les coordonnées UV pour corriger l'orientation si nécessaire
-for (let i = 0; i < segments; i++) {
-    const startIdx = i * 4 * 2;
-    uvs[startIdx + 1] = 0; // v1 (en bas)
-    uvs[startIdx + 3] = 0; // v2 (en bas)
-    uvs[startIdx + 5] = 1; // v3 (en haut)
-    uvs[startIdx + 7] = 1; // v4 (en haut)
+    uvs[startIdx + 7] = 1;                // v4 (en haut)
 }
 
 // Met à jour les attributs UV de la géométrie
