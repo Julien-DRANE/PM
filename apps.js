@@ -1,5 +1,5 @@
 // Nombre de segments (facettes) correspondant au nombre d'images
-const segments = 7; // Assure-toi que cette ligne est bien présente
+const segments = 7;
 
 // Initialisation de la scène
 const scene = new THREE.Scene();
