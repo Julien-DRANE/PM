@@ -108,11 +108,13 @@ function alignOnFace(cylinder) {
 
 // Gestion du clic de la souris pour faire pivoter le cylindre supérieur
 renderer.domElement.addEventListener('mousedown', (event) => {
-    isUpperDragging = true;
-    previousUpperMousePosition = {
-        x: event.clientX,
-        y: event.clientY
-    };
+    if (event.button === 0) { // S'assurer que seul le bouton gauche de la souris est utilisé
+        isUpperDragging = true;
+        previousUpperMousePosition = {
+            x: event.clientX,
+            y: event.clientY
+        };
+    }
 });
 
 // Gestion du mouvement de la souris pour faire pivoter le cylindre supérieur
@@ -135,11 +137,13 @@ renderer.domElement.addEventListener('mouseup', () => {
 
 // Gestion du clic de la souris pour faire pivoter le cylindre inférieur
 renderer.domElement.addEventListener('mousedown', (event) => {
-    isLowerDragging = true;
-    previousLowerMousePosition = {
-        x: event.clientX,
-        y: event.clientY
-    };
+    if (event.button === 2) { // S'assurer que seul le bouton droit de la souris est utilisé
+        isLowerDragging = true;
+        previousLowerMousePosition = {
+            x: event.clientX,
+            y: event.clientY
+        };
+    }
 });
 
 // Gestion du mouvement de la souris pour faire pivoter le cylindre inférieur
