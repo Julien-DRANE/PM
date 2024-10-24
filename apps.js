@@ -66,6 +66,15 @@ for (let i = 0; i < segments; i++) {
     uvs[startIdx + 7] = 0;                // v4 (en bas)
 }
 
+// Inverser les coordonnées UV pour corriger l'orientation si nécessaire
+for (let i = 0; i < segments; i++) {
+    const startIdx = i * 4 * 2;
+    uvs[startIdx + 1] = 0; // v1 (en bas)
+    uvs[startIdx + 3] = 0; // v2 (en bas)
+    uvs[startIdx + 5] = 1; // v3 (en haut)
+    uvs[startIdx + 7] = 1; // v4 (en haut)
+}
+
 // Met à jour les attributs UV de la géométrie
 geometry.attributes.uv.needsUpdate = true;
 
@@ -76,10 +85,6 @@ upperCylinder.position.y = height / 4; // Positionner en haut
 // Création de la partie inférieure
 const lowerCylinder = new THREE.Mesh(geometry, lowerMaterials);
 lowerCylinder.position.y = -height / 4; // Positionner en bas
-
-// S'assurer que les cylindres ne se superposent pas
-upperCylinder.position.y += height / 4; // Ajuste la position du cylindre supérieur
-lowerCylinder.position.y -= height / 4; // Ajuste la position du cylindre inférieur
 
 // Ajouter les cylindres à la scène
 scene.add(upperCylinder);
