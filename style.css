@@ -9,6 +9,7 @@ html, body {
     height: 100%;
     width: 100%;
     overflow: hidden;
+    font-family: Arial, sans-serif;
 }
 
 #game-container {
@@ -18,6 +19,7 @@ html, body {
     align-items: center;
     height: 100%;
     background-color: #f0f0f0;
+    position: relative;
 }
 
 #character {
@@ -32,13 +34,20 @@ html, body {
     top: 0;
     left: 0;
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: contain; /* Assure que les images ne déforment pas */
 }
 
 #controls {
-    margin-top: 20px;
+    position: absolute;
+    bottom: 20px;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.control-group {
+    display: flex;
     justify-content: center;
     gap: 10px;
 }
