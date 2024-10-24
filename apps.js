@@ -17,6 +17,13 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// Ajustement de la taille du rendu pour occuper tout l'écran
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
 // Nombre de segments (facettes) correspondant au nombre d'images
 const segments = 7;
 let radius = 5; // Rayon fixe pour simplifier
@@ -65,10 +72,11 @@ for (let i = 0; i < segments; i++) {
 const cylinder = new THREE.Mesh(geometry, materials);
 scene.add(cylinder);
 
-// Variables de contrôle pour les interactions
+// Variables de contrôle pour les interactions et l'inertie
 let rotationSpeed = 0;
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
+let segmentAngle = (2 * Math.PI) / segments;
 
 // Gestion des touches du clavier
 window.addEventListener('keydown', (event) => {
@@ -81,7 +89,7 @@ window.addEventListener('keydown', (event) => {
 
 // Arrêter la rotation lors du relâchement des touches
 window.addEventListener('keyup', () => {
-    rotationSpeed = 0;
+    rotationSpeed *= 0.95; // Ajoute de l'inertie après relâchement
 });
 
 // Gestion du clic de la souris pour faire pivoter le cylindre
@@ -96,7 +104,7 @@ renderer.domElement.addEventListener('mousedown', (event) => {
 renderer.domElement.addEventListener('mousemove', (event) => {
     if (isDragging) {
         const deltaX = event.clientX - previousMousePosition.x;
-        cylinder.rotation.y += deltaX * 0.005;
+        rotationSpeed = deltaX * 0.001;
         previousMousePosition = {
             x: event.clientX,
             y: event.clientY
@@ -106,6 +114,8 @@ renderer.domElement.addEventListener('mousemove', (event) => {
 
 renderer.domElement.addEventListener('mouseup', () => {
     isDragging = false;
+    // Applique une inertie à la fin du drag
+    rotationSpeed *= 0.95;
 });
 
 // Gestion du swipe sur mobile
@@ -118,17 +128,39 @@ renderer.domElement.addEventListener('touchstart', (event) => {
 
 renderer.domElement.addEventListener('touchmove', (event) => {
     const deltaX = event.touches[0].clientX - previousMousePosition.x;
-    cylinder.rotation.y += deltaX * 0.005;
+    rotationSpeed = deltaX * 0.001;
     previousMousePosition = {
         x: event.touches[0].clientX,
         y: event.touches[0].clientY
     };
 });
 
+// Fonction pour aligner le cylindre sur les facettes
+function alignToFacets() {
+    // Calcule l'angle actuel de rotation du cylindre
+    let currentRotation = cylinder.rotation.y;
+    
+    // Trouve l'angle le plus proche correspondant à une facette
+    let closestAngle = Math.round(currentRotation / segmentAngle) * segmentAngle;
+    
+    // Effectue un lissage pour caler le cylindre
+    cylinder.rotation.y += (closestAngle - currentRotation) * 0.1;
+}
+
 // Animation pour faire tourner le cylindre selon les interactions
 function animate() {
     requestAnimationFrame(animate);
+    // Appliquer l'inertie
+    if (!isDragging) {
+        rotationSpeed *= 0.95; // Réduire progressivement la vitesse de rotation pour créer l'inertie
+    }
+    
     cylinder.rotation.y += rotationSpeed;
+
+    if (!isDragging) {
+        alignToFacets();
+    }
+
     renderer.render(scene, camera);
 }
 
