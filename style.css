@@ -20,15 +20,15 @@ html, body {
     height: 100%;
     background-color: #f0f0f0;
     position: relative;
+    padding: 0;
+    margin: 0;
 }
 
 #character {
     position: relative;
     width: 80%;
     max-width: 300px;
-    /* Maintenir un ratio fixe si nécessaire */
     aspect-ratio: 1 / 1; /* Ajustez selon vos images */
-    /* Assurer que les images couvrent entièrement le conteneur */
     width: 100%;
     height: auto;
 }
@@ -39,8 +39,9 @@ html, body {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Utilisez 'cover' pour s'assurer que l'image couvre tout le conteneur */
+    object-fit: cover; /* Assure que l'image couvre tout le conteneur */
     display: block;
+    margin: 0;
 }
 
 #controls {
