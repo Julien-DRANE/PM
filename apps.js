@@ -47,7 +47,7 @@ for (let i = 0; i < segments; i++) {
 
 // Création de la géométrie du cylindre
 const radius = 5; // Rayon du cylindre
-const height = 10; // Hauteur du cylindre
+const height = 10; // Hauteur totale du cylindre
 const geometry = new THREE.CylinderGeometry(radius, radius, height, segments, 1, true); // Cylindre
 
 // Ajustement des coordonnées UV
