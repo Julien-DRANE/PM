@@ -5,21 +5,44 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Nombre de segments (facettes)
+// Nombre de segments (facettes) correspondant au nombre d'images
 const segments = 7;
-const radius = 5;
-const height = 10;
+let radius = 5;
+let height = 10;
 
-// Crée un tableau de matériaux (un pour chaque facette)
+// Crée un tableau de matériaux et charge les textures
 const materials = [];
 const textureLoader = new THREE.TextureLoader();
+let totalWidth = 0; // Largeur totale des facettes
+
+// Charge les textures et ajuste la taille du cylindre
 for (let i = 0; i < segments; i++) {
     const texturePath = `textures/facet${i + 1}.png`; // Chemin des images PNG
-    const texture = textureLoader.load(texturePath);
+    const texture = textureLoader.load(texturePath, (texture) => {
+        // Redimensionne les UV de la texture pour chaque facette
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+
+        // Récupère les dimensions de l'image
+        const imageWidth = texture.image.width;
+        const imageHeight = texture.image.height;
+
+        // Ajuste le rayon du cylindre en fonction de la largeur des images
+        radius = Math.max(radius, imageWidth / (2 * Math.PI / segments));
+        height = imageHeight; // Ajuste la hauteur du cylindre à la hauteur des images
+
+        // Calcule la largeur totale des facettes pour ajuster le rayon
+        totalWidth += imageWidth;
+    });
+
+    // Crée un matériau pour chaque facette avec une texture unique
     materials.push(new THREE.MeshBasicMaterial({ map: texture }));
 }
 
-// Création de la géométrie du cylindre avec 7 segments
+// Réinitialise le rayon pour correspondre à la largeur totale des images
+radius = totalWidth / (2 * Math.PI);
+
+// Création de la géométrie du cylindre avec les nouvelles dimensions
 const geometry = new THREE.CylinderGeometry(radius, radius, height, segments, 1, true);
 
 // Divise la géométrie en groupes pour chaque facette
