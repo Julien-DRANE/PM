@@ -1,9 +1,9 @@
 // Nombre de segments (facettes) correspondant au nombre d'images
-const segments = 7;
+const segments = 7; // Assure-toi que cette ligne est bien présente
 
 // Initialisation de la scène
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xaaaaaa);
+scene.background = new THREE.Color(0xaaaaaa); // Définir un fond clair
 
 // Ajout d'une lumière directionnelle
 const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -12,7 +12,7 @@ scene.add(light);
 
 // Initialisation de la caméra
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 20);
+camera.position.set(0, 0, 20); // Position de la caméra pour voir le cylindre
 camera.lookAt(0, 0, 0);
 
 // Initialisation du rendu
@@ -37,17 +37,11 @@ for (let i = 0; i < segments; i++) {
     const lowerTexturePath = `textures/facet_lower_${i + 1}.png`; // Chemin des images PNG pour le bas
 
     // Charger la texture pour le haut
-    const upperTexture = textureLoader.load(upperTexturePath, (texture) => {
-        texture.wrapS = THREE.ClampToEdgeWrapping; // Évite l'étirement horizontal
-        texture.wrapT = THREE.ClampToEdgeWrapping; // Évite l'étirement vertical
-    });
+    const upperTexture = textureLoader.load(upperTexturePath);
     upperMaterials.push(new THREE.MeshBasicMaterial({ map: upperTexture }));
 
     // Charger la texture pour le bas
-    const lowerTexture = textureLoader.load(lowerTexturePath, (texture) => {
-        texture.wrapS = THREE.ClampToEdgeWrapping; // Évite l'étirement horizontal
-        texture.wrapT = THREE.ClampToEdgeWrapping; // Évite l'étirement vertical
-    });
+    const lowerTexture = textureLoader.load(lowerTexturePath);
     lowerMaterials.push(new THREE.MeshBasicMaterial({ map: lowerTexture }));
 }
 
