@@ -59,43 +59,72 @@ function preloadImages() {
     }
 }
 
-// Initialisation
+// Initialisation au chargement de la fenêtre
 window.onload = () => {
     preloadImages();
     updateUpperImage();
     updateLowerImage();
 };
 
-// Gestion des gestes de glissement (swipe) sur le personnage
+// Variables pour la gestion des gestes de glissement
 let touchStartX = 0;
 let touchEndX = 0;
+let touchStartY = 0;
+let touchEndY = 0;
+
+// Seuil de détection pour considérer un swipe
+const SWIPE_THRESHOLD = 50; // en pixels
 
 const character = document.getElementById('character');
 
+// Événement touchstart pour capturer le début du geste
 character.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX;
+    if (e.touches.length === 1) { // Assure qu'un seul doigt est utilisé
+        touchStartX = e.touches[0].screenX;
+        touchStartY = e.touches[0].screenY;
+    }
 }, false);
 
+// Événement touchend pour capturer la fin du geste
 character.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleGesture();
+    if (e.changedTouches.length === 1) { // Assure qu'un seul doigt a été utilisé
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        handleGesture();
+    }
 }, false);
 
+// Fonction pour gérer le geste détecté
 function handleGesture() {
     const deltaX = touchEndX - touchStartX;
-    const threshold = 50; // Distance minimale pour considérer un swipe
+    const deltaY = touchEndY - touchStartY;
 
-    if (Math.abs(deltaX) > threshold) {
-        if (deltaX > 0) {
-            // Swipe vers la droite
-            // Changer la partie inférieure
-            currentLower = currentLower === 1 ? TOTAL_LOWER : currentLower - 1;
-            updateLowerImage();
-        } else {
-            // Swipe vers la gauche
-            // Changer la partie inférieure
-            currentLower = currentLower === TOTAL_LOWER ? 1 : currentLower + 1;
-            updateLowerImage();
+    // Détermination si le geste est horizontal ou vertical
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Geste horizontal
+        if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
+            if (deltaX > 0) {
+                // Swipe vers la droite - Changer la partie inférieure vers la tenue précédente
+                currentLower = currentLower === 1 ? TOTAL_LOWER : currentLower - 1;
+                updateLowerImage();
+            } else {
+                // Swipe vers la gauche - Changer la partie inférieure vers la tenue suivante
+                currentLower = currentLower === TOTAL_LOWER ? 1 : currentLower + 1;
+                updateLowerImage();
+            }
+        }
+    } else {
+        // Geste vertical
+        if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
+            if (deltaY > 0) {
+                // Swipe vers le bas - Changer la partie supérieure vers la tenue précédente
+                currentUpper = currentUpper === 1 ? TOTAL_UPPER : currentUpper - 1;
+                updateUpperImage();
+            } else {
+                // Swipe vers le haut - Changer la partie supérieure vers la tenue suivante
+                currentUpper = currentUpper === TOTAL_UPPER ? 1 : currentUpper + 1;
+                updateUpperImage();
+            }
         }
     }
 }
@@ -113,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Entrer en plein écran au clic sur l'écran
+    // Entrer en plein écran au premier clic/tap sur l'écran
     document.body.addEventListener('click', () => {
         enterFullScreen();
     }, { once: true });
