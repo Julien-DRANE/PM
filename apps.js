@@ -27,142 +27,108 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Crée un tableau de matériaux et charge les textures
-const materials = [];
+// Crée un tableau de matériaux et charge les textures pour le haut et le bas
+const upperMaterials = [];
+const lowerMaterials = [];
 const textureLoader = new THREE.TextureLoader();
-for (let i = 0; i < segments; i++) {
-    const texturePath = `textures/facet${i + 1}.png`; // Chemin des images PNG
-    const texture = textureLoader.load(
-        texturePath,
-        (texture) => {
-            // Améliorer la qualité de la texture
-            texture.minFilter = THREE.LinearMipMapLinearFilter; // Meilleur filtrage
-            texture.magFilter = THREE.LinearFilter; // Meilleur filtrage pour le zoom
-            texture.wrapS = THREE.ClampToEdgeWrapping;
-            texture.wrapT = THREE.ClampToEdgeWrapping;
-            console.log(`Texture ${i + 1} chargée`);
-        },
-        undefined,
-        (err) => console.error(`Erreur de chargement de la texture ${texturePath}`, err)
-    );
 
-    // Crée un matériau pour chaque facette avec une texture unique
-    materials.push(new THREE.MeshBasicMaterial({ map: texture }));
+for (let i = 0; i < segments; i++) {
+    const upperTexturePath = `textures/facet_upper_${i + 1}.png`; // Chemin des images PNG pour le haut
+    const lowerTexturePath = `textures/facet_lower_${i + 1}.png`; // Chemin des images PNG pour le bas
+
+    // Charger la texture pour le haut
+    const upperTexture = textureLoader.load(upperTexturePath);
+    upperMaterials.push(new THREE.MeshBasicMaterial({ map: upperTexture }));
+
+    // Charger la texture pour le bas
+    const lowerTexture = textureLoader.load(lowerTexturePath);
+    lowerMaterials.push(new THREE.MeshBasicMaterial({ map: lowerTexture }));
 }
 
 // Création de la géométrie du cylindre avec des dimensions fixes
 const radius = 5; // Rayon fixe pour simplifier
 const height = 10; // Hauteur fixe pour simplifier
-const geometry = new THREE.CylinderGeometry(radius, radius, height, segments, 1, true);
+const geometry = new THREE.CylinderGeometry(radius, radius, height / 2, segments, 1, true); // Cylindre pour la moitié supérieure
 
-// Ajuste les coordonnées UV de manière simple pour chaque segment
-const uvs = geometry.attributes.uv.array;
-for (let i = 0; i < segments; i++) {
-    const startIdx = i * 4 * 2;
-    // Les UV sont ajustés pour centrer les textures sur chaque segment
-    uvs[startIdx] = 0;        // u1
-    uvs[startIdx + 2] = 1;    // u2
-    uvs[startIdx + 4] = 0;    // u3
-    uvs[startIdx + 6] = 1;    // u4
-}
+// Création de la partie supérieure
+const upperCylinder = new THREE.Mesh(geometry, upperMaterials);
+upperCylinder.position.y = height / 4; // Positionner en haut
 
-// Met à jour les attributs UV de la géométrie
-geometry.attributes.uv.needsUpdate = true;
+// Création de la partie inférieure
+const lowerCylinder = new THREE.Mesh(geometry, lowerMaterials);
+lowerCylinder.position.y = -height / 4; // Positionner en bas
 
-// Divise la géométrie en groupes pour chaque facette
-geometry.clearGroups();
-for (let i = 0; i < segments; i++) {
-    geometry.addGroup(i * 6, 6, i); // Chaque facette a 6 indices de triangles
-}
-
-// Crée le cylindre avec les matériaux multiples
-const cylinder = new THREE.Mesh(geometry, materials);
-scene.add(cylinder);
+// Ajouter les cylindres à la scène
+scene.add(upperCylinder);
+scene.add(lowerCylinder);
 
 // Variables de contrôle pour les interactions
-let rotationSpeed = 0;
-let isDragging = false;
-let previousMousePosition = { x: 0, y: 0 };
-let segmentAngle = (2 * Math.PI) / segments;
+let upperRotationSpeed = 0;
+let lowerRotationSpeed = 0;
+let isUpperDragging = false;
+let isLowerDragging = false;
+let previousUpperMousePosition = { x: 0, y: 0 };
+let previousLowerMousePosition = { x: 0, y: 0 };
 
-// Gestion des touches du clavier pour la rotation
-window.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft') {
-        rotationSpeed = 0.05;
-    } else if (event.key === 'ArrowRight') {
-        rotationSpeed = -0.05;
-    }
-});
-
-// Arrêter la rotation lors du relâchement des touches
-window.addEventListener('keyup', () => {
-    rotationSpeed = 0; // Arrête immédiatement la rotation
-    alignToFacets(); // Aligne sur la facette après l'arrêt
-});
-
-// Gestion du clic de la souris pour faire pivoter le cylindre
+// Gestion du clic de la souris pour faire pivoter le cylindre supérieur
 renderer.domElement.addEventListener('mousedown', (event) => {
-    isDragging = true;
-    previousMousePosition = {
+    isUpperDragging = true;
+    previousUpperMousePosition = {
         x: event.clientX,
         y: event.clientY
     };
 });
 
+// Gestion du mouvement de la souris pour faire pivoter le cylindre supérieur
 renderer.domElement.addEventListener('mousemove', (event) => {
-    if (isDragging) {
-        const deltaX = event.clientX - previousMousePosition.x;
-        rotationSpeed = deltaX * 0.002; // Applique une petite variation de rotation par mouvement de souris
-        previousMousePosition = {
+    if (isUpperDragging) {
+        const deltaX = event.clientX - previousUpperMousePosition.x;
+        upperRotationSpeed = deltaX * 0.002; // Applique une petite variation de rotation par mouvement de souris
+        previousUpperMousePosition = {
             x: event.clientX,
             y: event.clientY
         };
     }
 });
 
+// Gestion de la fin du clic pour le cylindre supérieur
 renderer.domElement.addEventListener('mouseup', () => {
-    isDragging = false;
-    rotationSpeed = 0; // Arrête immédiatement la rotation
-    alignToFacets(); // Aligne sur la facette après la fin du drag
+    isUpperDragging = false;
 });
 
-// Gestion du swipe sur mobile
-renderer.domElement.addEventListener('touchstart', (event) => {
-    previousMousePosition = {
-        x: event.touches[0].clientX,
-        y: event.touches[0].clientY
+// Gestion du clic de la souris pour faire pivoter le cylindre inférieur
+renderer.domElement.addEventListener('mousedown', (event) => {
+    isLowerDragging = true;
+    previousLowerMousePosition = {
+        x: event.clientX,
+        y: event.clientY
     };
 });
 
-renderer.domElement.addEventListener('touchmove', (event) => {
-    const deltaX = event.touches[0].clientX - previousMousePosition.x;
-    rotationSpeed = deltaX * 0.002; // Applique une petite variation de rotation par mouvement de touche
-    previousMousePosition = {
-        x: event.touches[0].clientX,
-        y: event.touches[0].clientY
-    };
+// Gestion du mouvement de la souris pour faire pivoter le cylindre inférieur
+renderer.domElement.addEventListener('mousemove', (event) => {
+    if (isLowerDragging) {
+        const deltaX = event.clientX - previousLowerMousePosition.x;
+        lowerRotationSpeed = deltaX * 0.002; // Applique une petite variation de rotation par mouvement de souris
+        previousLowerMousePosition = {
+            x: event.clientX,
+            y: event.clientY
+        };
+    }
 });
 
-renderer.domElement.addEventListener('touchend', () => {
-    rotationSpeed = 0; // Arrête immédiatement la rotation
-    alignToFacets(); // Aligne sur la facette après le swipe
+// Gestion de la fin du clic pour le cylindre inférieur
+renderer.domElement.addEventListener('mouseup', () => {
+    isLowerDragging = false;
 });
-
-// Alignement automatique sur les facettes
-function alignToFacets() {
-    let currentRotation = cylinder.rotation.y;
-    let closestAngle = Math.round(currentRotation / segmentAngle) * segmentAngle;
-    cylinder.rotation.y += (closestAngle - currentRotation) * 0.1; // Lissage
-}
 
 // Animation avec alignement
 function animate() {
     requestAnimationFrame(animate);
     
     // Appliquer la vitesse de rotation
-    cylinder.rotation.y += rotationSpeed; 
-
-    alignToFacets(); // Caler automatiquement sur les facettes
+    upperCylinder.rotation.y += upperRotationSpeed; 
+    lowerCylinder.rotation.y += lowerRotationSpeed; 
 
     renderer.render(scene, camera);
 }
