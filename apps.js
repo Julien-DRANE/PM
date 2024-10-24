@@ -2,7 +2,7 @@
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xaaaaaa); // Définir un fond clair
 
-// Ajout d'une lumière directionnelle
+// Ajout d'une lumière directionnelle (au cas où des matériaux sensibles à la lumière sont utilisés)
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 1, 1).normalize();
 scene.add(light);
@@ -19,20 +19,35 @@ document.body.appendChild(renderer.domElement);
 
 // Nombre de segments (facettes) correspondant au nombre d'images
 const segments = 7;
-let radius = 5;
 let height = 10;
 
 // Crée un tableau de matériaux et charge les textures
 const materials = [];
 const textureLoader = new THREE.TextureLoader();
 let totalWidth = 0; // Largeur totale des facettes
+const imageWidths = [];
 
 // Charge les textures et ajuste la taille du cylindre
 for (let i = 0; i < segments; i++) {
     const texturePath = `textures/facet${i + 1}.png`; // Chemin des images PNG
     const texture = textureLoader.load(
         texturePath,
-        () => console.log(`Texture ${i + 1} chargée`),
+        (texture) => {
+            // Récupère les dimensions de l'image
+            const imageWidth = texture.image.width;
+            const imageHeight = texture.image.height;
+
+            // Stocke la largeur de l'image pour les calculs ultérieurs
+            imageWidths.push(imageWidth);
+
+            // Ajuste la hauteur du cylindre pour correspondre à la hauteur des images
+            height = Math.max(height, imageHeight);
+
+            // Redimensionne les UV de la texture pour chaque facette
+            texture.wrapS = THREE.ClampToEdgeWrapping;
+            texture.wrapT = THREE.ClampToEdgeWrapping;
+            texture.repeat.set(1, 1);
+        },
         undefined,
         (err) => console.error(`Erreur de chargement de la texture ${texturePath}`, err)
     );
@@ -41,13 +56,34 @@ for (let i = 0; i < segments; i++) {
     materials.push(new THREE.MeshBasicMaterial({ map: texture }));
 }
 
-// Création de la géométrie du cylindre avec 7 segments
+// Calcule le rayon du cylindre en fonction de la largeur totale des images
+const totalImageWidth = imageWidths.reduce((a, b) => a + b, 0);
+const averageWidth = totalImageWidth / segments;
+const radius = averageWidth / (2 * Math.PI / segments);
+
+// Création de la géométrie du cylindre avec les nouvelles dimensions
 const geometry = new THREE.CylinderGeometry(radius, radius, height, segments, 1, true);
+
+// Ajuste les coordonnées UV pour centrer les images sur chaque facette
+const uvs = geometry.attributes.uv.array;
+for (let i = 0; i < segments; i++) {
+    const startIdx = i * 4 * 2;
+    const imgWidthRatio = imageWidths[i] / averageWidth;
+
+    // Centrer chaque segment d'UV
+    uvs[startIdx] = 0.5 - (imgWidthRatio / 2);       // u1
+    uvs[startIdx + 2] = 0.5 + (imgWidthRatio / 2);   // u2
+    uvs[startIdx + 4] = 0.5 - (imgWidthRatio / 2);   // u3
+    uvs[startIdx + 6] = 0.5 + (imgWidthRatio / 2);   // u4
+}
+
+// Met à jour les attributs UV de la géométrie
+geometry.attributes.uv.needsUpdate = true;
 
 // Divise la géométrie en groupes pour chaque facette
 geometry.clearGroups();
 for (let i = 0; i < segments; i++) {
-    geometry.addGroup(i * 6, 6, i);
+    geometry.addGroup(i * 6, 6, i); // Chaque facette a 6 indices de triangles
 }
 
 // Crée le cylindre avec les matériaux multiples
